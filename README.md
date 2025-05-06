@@ -69,3 +69,14 @@ make test           # for testing
 go test -v ./...    # also testing.
 make clean          # clean extra files
 ```
+
+### Usage
+
+```
+./biathlon --config [PathToConfigFile] --events [PathToEventsFile]
+```
+Support flags/options:
+  - config - accept path to config(json) file.
+  - events - accept path to file contains a set of events in this format.
+
+
