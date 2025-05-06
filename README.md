@@ -64,8 +64,8 @@ sorted by ascending time.
 ## Build/Run/Test
 
 ```
-make build		   # for build
-make test 		   # for testing
-go test -v ./... # also testing.
-make clean 			 # clean extra files
+make build          # for build
+make test           # for testing
+go test -v ./...    # also testing.
+make clean          # clean extra files
 ```
