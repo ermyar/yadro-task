@@ -1,4 +1,4 @@
-# yadro-task
+# Yadro-task
 
 System prototype for biathlon competitions
 
