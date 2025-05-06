@@ -7,7 +7,7 @@ import (
 )
 
 // provide Time type in one day
-// (hoping that all timing are processing in one day)
+// (hope that all timing are processing in one day)
 type myTime uint64
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 // returns myTime data from `str`
-// which match `HH:MM:SS.sss`
+// which match `HH:MM:SS.sss` or `HH:MM:SS`
 func parseTime(str string) (myTime, error) {
 	var ans myTime = 0
 	parts := strings.Split(str, ":")
