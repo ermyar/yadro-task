@@ -35,4 +35,5 @@ func main() {
 		fmt.Fprintf(os.Stderr, "wrong events file")
 		os.Exit(-1)
 	}
+	output(&compete, &data)
 }

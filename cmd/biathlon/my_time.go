@@ -58,7 +58,7 @@ func parseTime(str string) (myTime, error) {
 }
 
 // returning time in format `HH:MM:SS.sss`
-func getString(time myTime) (str string) {
+func (time myTime) getString() (str string) {
 	h := time / miliHour
 	time %= miliHour
 
@@ -69,4 +69,12 @@ func getString(time myTime) (str string) {
 	time %= miliSec
 
 	return fmt.Sprintf("%02d:%02d:%02d.%03d", h, m, s, time)
+}
+
+func (time myTime) sub(other myTime) myTime {
+	return time - other
+}
+
+func (time myTime) add(interval myTime) myTime {
+	return time + interval
 }

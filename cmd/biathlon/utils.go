@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// structure to read json
 type jsonRace struct {
 	Laps         int    `json:"laps"`
 	LapLen       int    `json:"lapLen"`
@@ -19,6 +20,7 @@ type jsonRace struct {
 	StartDelta   string `json:"startDelta"`
 }
 
+// reading json (config file)
 func readJSON(path string) (data jsonRace, err error) {
 	var jsonFile []byte
 	jsonFile, err = os.ReadFile(path)
@@ -31,10 +33,11 @@ func readJSON(path string) (data jsonRace, err error) {
 
 type statusRacer int
 
+// enum for statusRacer and constants
 const (
 	finished statusRacer = iota
-	notStarted
 	notFinished
+	notStarted
 	countOfTargets int = 5
 )
 
@@ -46,14 +49,13 @@ type lapStat struct {
 // statistic about one of competitor
 // calculating during events hadling
 type stat struct {
-	status        statusRacer
-	startTime     myTime
-	lastStartTime myTime
-	totalTime     myTime
-	penalty       lapStat
-	lapsCounter   int
-	laps          []lapStat
-	hitStat       struct {
+	status      statusRacer
+	startTime   myTime
+	totalTime   myTime
+	penalty     lapStat
+	lapsCounter int
+	laps        []lapStat
+	shotStat    struct {
 		missed int
 		hitted int
 		total  int
@@ -63,7 +65,7 @@ type stat struct {
 // check that nobody skipped his/her timing
 func checkQueue(raceStat *biathlon, current myTime) {
 	for len(raceStat.queue) > 0 && raceStat.queue[0].end < current {
-		fmt.Printf("[%s] 32 %d", getString(raceStat.queue[0].end), raceStat.queue[0].compID)
+		fmt.Printf("[%s] 32 %d", raceStat.queue[0].end.getString(), raceStat.queue[0].compID)
 		val := raceStat.participants[raceStat.queue[0].compID]
 		val.status = notStarted
 		raceStat.participants[raceStat.queue[0].compID] = val
@@ -94,9 +96,10 @@ func handle(raceStat *biathlon, args ...string) error {
 		val := raceStat.participants[competitor]
 		scheduledStart, _ := parseTime(args[3])
 
+		val.startTime = scheduledStart
 		raceStat.queue = append(raceStat.queue,
 			interval{competitor, scheduledStart + raceStat.startDelta})
-		val.laps[val.lapsCounter].enterTime = time
+		val.laps[val.lapsCounter].enterTime = scheduledStart
 
 		raceStat.participants[competitor] = val
 	case 3:
@@ -107,15 +110,15 @@ func handle(raceStat *biathlon, args ...string) error {
 	case 5:
 		log.Printf("%s The competitor(%s) is on the firing range(%s)\n", args[0], args[2], args[3])
 		val := raceStat.participants[competitor]
-		val.hitStat.total += countOfTargets
-		val.hitStat.missed += countOfTargets
+		val.shotStat.total += countOfTargets
+		val.shotStat.missed += countOfTargets
 		raceStat.participants[competitor] = val
 	case 6:
 		log.Printf("%s The target(%s) has been hit by competitor(%s)\n", args[0], args[3], args[2])
 		val := raceStat.participants[competitor]
 
-		val.hitStat.missed--
-		val.hitStat.hitted++
+		val.shotStat.missed--
+		val.shotStat.hitted++
 
 		raceStat.participants[competitor] = val
 	case 7:
@@ -143,14 +146,21 @@ func handle(raceStat *biathlon, args ...string) error {
 		val.lapsCounter++
 		if val.lapsCounter == len(val.laps) {
 			fmt.Printf("%s 33 %s\n", args[0], args[2])
-			return nil
+			val.totalTime = time - val.startTime
+		} else {
+			val.laps[val.lapsCounter].enterTime = time
 		}
-		val.laps[val.lapsCounter].enterTime = time
 
 		raceStat.participants[competitor] = val
 
 	case 11:
 		log.Printf("%s The competitor(%s) can`t continue: %s\n", args[0], args[2], args[3])
+
+		val := raceStat.participants[competitor]
+		val.status = notFinished
+		val.totalTime = time.sub(val.startTime)
+
+		raceStat.participants[competitor] = val
 	default:
 		log.Printf("Wrong event ID\n")
 		return fmt.Errorf("wrong event ID")
@@ -173,7 +183,6 @@ func proc(raceStat *biathlon, path string) error {
 		line := scanner.Text()
 		lst := strings.SplitN(line, " ", 4)
 
-		// fmt.Println(len(lst), lst)
 		handle(raceStat, lst...)
 	}
 
