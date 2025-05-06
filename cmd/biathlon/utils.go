@@ -65,7 +65,7 @@ type stat struct {
 // check that nobody skipped his/her timing
 func checkQueue(raceStat *biathlon, current myTime) {
 	for len(raceStat.queue) > 0 && raceStat.queue[0].end < current {
-		fmt.Printf("[%s] 32 %d", raceStat.queue[0].end.getString(), raceStat.queue[0].compID)
+		fmt.Printf("[%s] 32 %d\n", raceStat.queue[0].end.getString(), raceStat.queue[0].compID)
 		val := raceStat.participants[raceStat.queue[0].compID]
 		val.status = notStarted
 		raceStat.participants[raceStat.queue[0].compID] = val
@@ -106,7 +106,9 @@ func handle(raceStat *biathlon, args ...string) error {
 		log.Printf("%s The competitor(%s) is on the start line\n", args[0], args[2])
 	case 4:
 		log.Printf("%s The competitor(%s) has started\n", args[0], args[2])
-		raceStat.queue = raceStat.queue[1:]
+		if len(raceStat.queue) > 0 {
+			raceStat.queue = raceStat.queue[1:]
+		}
 	case 5:
 		log.Printf("%s The competitor(%s) is on the firing range(%s)\n", args[0], args[2], args[3])
 		val := raceStat.participants[competitor]
@@ -130,6 +132,7 @@ func handle(raceStat *biathlon, args ...string) error {
 		val.penalty.enterTime = time
 
 		raceStat.participants[competitor] = val
+
 	case 9:
 		log.Printf("%s The competitor(%s) left the penalty laps\n", args[0], args[2])
 		val := raceStat.participants[competitor]
@@ -138,6 +141,7 @@ func handle(raceStat *biathlon, args ...string) error {
 		val.penalty.enterTime = 0
 
 		raceStat.participants[competitor] = val
+
 	case 10:
 		val := raceStat.participants[competitor]
 		log.Printf("%s The competitor(%s) ended the main lap\n", args[0], args[2])
@@ -146,6 +150,7 @@ func handle(raceStat *biathlon, args ...string) error {
 		val.lapsCounter++
 		if val.lapsCounter == len(val.laps) {
 			fmt.Printf("%s 33 %s\n", args[0], args[2])
+			val.status = finished
 			val.totalTime = time - val.startTime
 		} else {
 			val.laps[val.lapsCounter].enterTime = time

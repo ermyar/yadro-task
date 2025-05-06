@@ -9,6 +9,7 @@ import (
 )
 
 // printing final report for all competitors
+// use special formatting by tabwritter (for goodlooking)
 func output(raceStat *biathlon, data *jsonRace) {
 	sl := make([]int, 0)
 	for k := range raceStat.participants {

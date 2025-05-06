@@ -22,6 +22,7 @@ type biathlon struct {
 func main() {
 	log.SetFlags(0)
 
+	// flags that provide us a configuration file and a eventfile
 	config := flag.String("config", "configs/config.json", "path to json contains Competition parameters (configuration file)")
 	events := flag.String("events", "test/integration/testdata/events", "path to file contains a set of external events of certain format")
 	flag.Parse()
